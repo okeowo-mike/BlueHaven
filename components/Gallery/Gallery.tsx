@@ -36,7 +36,7 @@ const galleryImages = [
   },
   {
     id: 6,
-    src: "kitchen.webp",
+    src: "kitchenn.jpeg",
     alt: "Modern kitchen with island",
     title: "Kitchen",
   },
