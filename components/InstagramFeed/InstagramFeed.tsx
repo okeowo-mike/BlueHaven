@@ -6,56 +6,47 @@ import styles from "./InstagramFeed.module.css";
 const instagramPosts = [
   {
     id: 1,
-    image:
-      "kitchen.jpeg",
+    image: "kitchen.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 2,
-    image:
-      "gym.jpeg",
+    image: "gym.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 3,
-    image:
-      "bathroom.jpeg",
+    image: "bathroom.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 4,
-    image:
-      "master.jpeg",
+    image: "master.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 5,
-    image:
-      "master-2.jpeg",
+    image: "master-2.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 6,
-    image:
-      "guest-1.jpeg",
+    image: "guest-1.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 7,
-    image:
-      "living-1.jpeg",
+    image: "living-1.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 8,
-    image:
-      "living-2.jpeg",
+    image: "living-2.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
     id: 9,
-    image:
-      "pool.jpeg",
+    image: "pool.webp",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
 ];
@@ -124,8 +115,7 @@ export default function InstagramFeed() {
             />
             <circle cx="18" cy="6" r="1" fill="currentColor" />
           </svg>
-          <span className={styles.handle}>@lekkiservicedapartment
-          </span>
+          <span className={styles.handle}>@lekkiservicedapartment</span>
         </div>
         <a
           href="https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
