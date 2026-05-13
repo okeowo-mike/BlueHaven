@@ -6,7 +6,7 @@ import styles from "./InstagramFeed.module.css";
 const instagramPosts = [
   {
     id: 1,
-    image: "kitchen.webp",
+    image: "kitchenn.jpeg",
     link: "https://www.instagram.com/lekkiservicedapartment?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
   },
   {
