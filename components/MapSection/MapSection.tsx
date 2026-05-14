@@ -34,7 +34,7 @@ const locations = [
     ),
     description: "Your luxury stay awaits",
     distance: "0 min",
-    coordinates: { lat: 25.7617, lng: -80.1918 },
+    coordinates: { lat: 6.439051, lng: 3.542686 },
   },
   {
     id: "hospital",
@@ -60,7 +60,7 @@ const locations = [
     ),
     description: "24/7 Emergency Care",
     distance: "5 min drive",
-    coordinates: { lat: 6.437, lng: 3.522 },
+    coordinates: { lat: 6.435316, lng: 3.542954 },
   },
   {
     id: "shopping",
@@ -83,13 +83,13 @@ const locations = [
         />
       </svg>
     ),
-    description: "Luxury shopping destination",
+    description: "Supermarket",
     distance: "10 min drive",
-    coordinates: { lat: 6.447, lng: 3.548 },
+    coordinates: { lat: 6.4377, lng: 3.542788 },
   },
   {
-    id: "restaurant",
-    name: "Ocean Drive Dining",
+    id: "Activities",
+    name: "Lekki Conservation Center",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <path
@@ -104,13 +104,13 @@ const locations = [
         />
       </svg>
     ),
-    description: "Fine dining & waterfront views",
+    description: "Fun activities for the whole family",
     distance: "8 min drive",
-    coordinates: { lat: 25.7808, lng: -80.13 },
+    coordinates: { lat: 6.441723, lng: 3.535603 },
   },
   {
     id: "fun",
-    name: "South Beach",
+    name: "Film House",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
@@ -128,9 +128,9 @@ const locations = [
         />
       </svg>
     ),
-    description: "Beach, nightlife & entertainment",
+    description: "Cinemas and Nightlife",
     distance: "15 min drive",
-    coordinates: { lat: 25.7825, lng: -80.134 },
+    coordinates: { lat: 6.448938, lng: 3.552133 },
   },
 ];
 
@@ -139,7 +139,9 @@ export default function MapSection() {
 
   const handleOpenInMaps = () => {
     const { lat, lng } = activeLocation.coordinates;
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+
     window.open(mapsUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -162,15 +164,15 @@ export default function MapSection() {
               {/* Interactive Map Placeholder */}
               <div className={styles.mapPlaceholder}>
                 <iframe
-                  src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14364.784!2d${activeLocation.coordinates.lng}!3d${activeLocation.coordinates.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1`}
+                  src={`https://maps.google.com/maps?q=${activeLocation.coordinates.lat},${activeLocation.coordinates.lng}&z=15&output=embed`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Property location map"
-                ></iframe>
+                  title={activeLocation.name}
+                />
               </div>
               <button className={styles.mapButton} onClick={handleOpenInMaps}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
