@@ -338,7 +338,7 @@ export default function Hero() {
                 <p style={{ fontSize: "0.85rem", marginTop: "4px" }}>
                   {checkIn && checkOut
                     ? `Check-in: ${checkIn}  →  Check-out: ${checkOut}`
-                    : "Tap a start date, then an end date. Greyed-out dates are already booked."}
+                    : "Tap a start date, then an end date. Greyed-out dates are booked by other guests."}
                 </p>
               </div>
 
