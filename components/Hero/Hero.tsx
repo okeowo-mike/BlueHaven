@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
 import styles from "./Hero.module.css";
 import { supabase } from "@/lib/supabase";
 
@@ -13,9 +15,20 @@ interface AvailabilityResult {
   serviceFee: number;
 }
 
+// Converts a Date to a "YYYY-MM-DD" string (matches Supabase date column format)
+function toISODate(date: Date) {
+  return date.toISOString().split("T")[0];
+}
+
 export default function Hero() {
+  // checkIn / checkOut stay as plain "YYYY-MM-DD" strings, same as before —
+  // only where they come from changes (the calendar, instead of two <input> fields).
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [blockedRanges, setBlockedRanges] = useState<
+    { from: Date; to: Date }[]
+  >([]);
   const [guests, setGuests] = useState(1);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,6 +38,38 @@ export default function Hero() {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load existing (non-cancelled) bookings once, so the calendar can grey them out
+  useEffect(() => {
+    const loadBlockedDates = async () => {
+      const { data, error } = await supabase
+        .from("Bookings")
+        .select("check_in, check_out")
+        .neq("booking_status", "cancelled");
+
+      if (error) {
+        console.error("Failed to load blocked dates:", error);
+        return;
+      }
+
+      const ranges = (data || []).map((b: any) => ({
+        from: new Date(b.check_in),
+        to: new Date(b.check_out),
+      }));
+      setBlockedRanges(ranges);
+    };
+
+    loadBlockedDates();
+  }, []);
+
+  const handleRangeSelect = (range: DateRange | undefined) => {
+    setDateRange(range);
+    setCheckIn(range?.from ? toISODate(range.from) : "");
+    setCheckOut(range?.to ? toISODate(range.to) : "");
+    // Selecting new dates invalidates any previous availability result
+    setShowResults(false);
+    setAvailability(null);
+  };
 
   const handleCheckAvailability = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,41 +81,42 @@ export default function Hero() {
 
     setIsLoading(true);
 
-    // TODO: Backend Integration
-    // Replace this mock data with actual API call:
-    // const response = await fetch('/api/check-availability', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ checkIn, checkOut, guests })
-    // });
-    // const data = await response.json();
+    try {
+      // Real availability check: does any non-cancelled booking overlap these dates?
+      const { data: overlap, error } = await supabase
+        .from("Bookings")
+        .select("id")
+        .neq("booking_status", "cancelled")
+        .lt("check_in", checkOut)
+        .gt("check_out", checkIn);
 
-    // TODO: Calendar Sync Integration
-    // Integrate with Airbnb/iCal calendar sync:
-    // - Fetch blocked dates from external calendars
-    // - Sync local availability with Airbnb, VRBO, etc.
-    // Example: await syncWithAirbnbCalendar(propertyId);
+      if (error) throw error;
 
-    // Mock availability check
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const isAvailable = !overlap || overlap.length === 0;
 
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
-    const nights = Math.ceil(
-      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const pricePerNight = 250;
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const nights = Math.ceil(
+        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const pricePerNight = 250;
 
-    setAvailability({
-      available: true,
-      pricePerNight,
-      totalNights: nights,
-      totalPrice: nights * pricePerNight,
-      cleaningFee: 75,
-      serviceFee: Math.round(nights * pricePerNight * 0.12),
-    });
+      setAvailability({
+        available: isAvailable,
+        pricePerNight,
+        totalNights: nights,
+        totalPrice: nights * pricePerNight,
+        cleaningFee: 75,
+        serviceFee: Math.round(nights * pricePerNight * 0.12),
+      });
 
-    setShowResults(true);
-    setIsLoading(false);
+      setShowResults(true);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to check availability. Please check your connection.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // ////////////////////////////////////////////////////////////////
@@ -81,11 +127,13 @@ export default function Hero() {
       setIsLoading(true);
 
       // FINAL SAFETY CHECK: Ensure dates didn't get taken in the last few minutes
+      // Two date ranges overlap if: existing.check_in < newCheckOut AND existing.check_out > newCheckIn
       const { data: overlap } = await supabase
         .from("Bookings")
         .select("id")
-        .lt("check_in", checkIn)
-        .gt("check_out", checkOut);
+        .neq("booking_status", "cancelled")
+        .lt("check_in", checkOut)
+        .gt("check_out", checkIn);
 
       if (overlap && overlap.length > 0) {
         alert("Someone just booked these dates! Please refresh and try again.");
@@ -207,18 +255,6 @@ export default function Hero() {
   //   alert("Booking functionality will be integrated with payment provider");
   // };
 
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  };
-
-  const getMinCheckoutDate = () => {
-    if (!checkIn) return getTodayDate();
-    const date = new Date(checkIn);
-    date.setDate(date.getDate() + 1);
-    return date.toISOString().split("T")[0];
-  };
-
   return (
     <section id="home" className={styles.hero}>
       <div className={styles.heroBackground}>
@@ -287,34 +323,23 @@ export default function Hero() {
                   required
                 />
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="checkIn" className={styles.label}>
-                  Check-in
-                </label>
-                <input
-                  type="date"
-                  id="checkIn"
-                  className={styles.input}
-                  value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  min={getTodayDate()}
-                  required
+              <div
+                className={styles.formGroup}
+                style={{ gridColumn: "1 / -1" }}
+              >
+                <label className={styles.label}>Select your dates</label>
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleRangeSelect}
+                  disabled={[{ before: new Date() }, ...blockedRanges]}
+                  numberOfMonths={1}
                 />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="checkOut" className={styles.label}>
-                  Check-out
-                </label>
-                <input
-                  type="date"
-                  id="checkOut"
-                  className={styles.input}
-                  value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  min={getMinCheckoutDate()}
-                  required
-                />
+                <p style={{ fontSize: "0.85rem", marginTop: "4px" }}>
+                  {checkIn && checkOut
+                    ? `Check-in: ${checkIn}  →  Check-out: ${checkOut}`
+                    : "Tap a start date, then an end date. Greyed-out dates are already booked."}
+                </p>
               </div>
 
               <div className={styles.formGroup}>
@@ -348,7 +373,16 @@ export default function Hero() {
           </form>
 
           {/* Availability Results */}
-          {showResults && availability && (
+          {showResults && availability && !availability.available && (
+            <div className={styles.results}>
+              <p style={{ color: "#b91c1c", fontWeight: 600 }}>
+                Sorry, these dates are not available. Please try different
+                dates.
+              </p>
+            </div>
+          )}
+
+          {showResults && availability && availability.available && (
             <div className={styles.results}>
               <div className={styles.resultsHeader}>
                 <span className={styles.availableBadge}>
